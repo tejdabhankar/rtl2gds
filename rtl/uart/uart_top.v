@@ -15,64 +15,62 @@
 //
 // Author: Tejas Dabhankar 
 //////////////////////////////////////////////////////////////////////
-module uart_top(
-    /* Clock input */
-    input clk,
+module uart_top
+  (
+   input       i_clock,
+   input       i_reset,
 
-    /* UART Signals */
-    output tx_active,
-    output tx_done,
-    output tx_serial,
-    input  rx_serial,
+   input       i_rx_serial,
+   output      o_tx_active,
+   output      o_tx_serial,
+   output      o_tx_done,
+   output      o_rx_verify,
 
-    input d0,
-    input d1,
-    input d2
-);
+   input       i_conf_d0,
+   input       i_conf_d1,
+   input       i_conf_d2
+   );
 
-    /* Parameters */
-    reg [15:0] Clock_Count;
+   wire [7:0] o_rx_byte;
+   wire         o_rx_dv;
 
-    /* UART Interface Wires */
-    wire [7:0] w_received_byte;       // Adjust PHY_FIFO_WIDTH if needed
-    wire w_data_dv;
+   reg [12:0] clks_per_bit;
 
-    /* Example config data (replace as per your design) */
-    reg [7:0] r_config_data;
-    wire rd_phy_fifo_en;
-    wire [7:0] rd_phy_fifo_data;
-
-    /* Clock divider selection */
     always @(*) begin
-        case ({d2,d1,d0})
-            3'b000: r_Clock_Count = 5208;
-            3'b001: r_Clock_Count = 2604;
-            3'b010: r_Clock_Count = 1302;
-            3'b011: r_Clock_Count = 868;
-            3'b100: r_Clock_Count = 434;
-            default: r_Clock_Count = 5208;
+        case({i_conf_d2, i_conf_d1, i_conf_d0})
+            3'b000: clks_per_bit = 13'd5208; // 9600 baud   (50M / 9600)
+            3'b001: clks_per_bit = 13'd2604; // 19200 baud  (50M / 19200)
+            3'b010: clks_per_bit = 13'd1302; // 38400 baud  (50M / 38400)
+            3'b011: clks_per_bit = 13'd868;  // 57600 baud  (50M / 57600)
+            3'b100: clks_per_bit = 13'd434;  // 115200 baud (50M / 115200)
+            3'b101: clks_per_bit = 13'd217;  // 230400 baud
+            3'b110: clks_per_bit = 13'd108;  // 460800 baud
+            3'b111: clks_per_bit = 13'd54;   // 921600 baud
+            default: clks_per_bit = 13'd434; // Default to 115200
         endcase
     end
 
-    /* UART Transmitter Instance */
-    uart_tx uarttx (
-        .i_Clock(clk),
-        .Clock_Count(r_Clock_Count),
-        .i_Tx_DV(w_data_dv),
-        .i_Tx_Byte(w_received_byte),
-        .o_Tx_Active(tx_active),
-        .o_Tx_Serial(tx_serial),
-        .o_Tx_Done(tx_done)
-    );
+   uart_tx uart_tx_inst
+   (
+     .i_Clock(i_clock),
+     .i_Reset(i_reset),
+     .i_Tx_DV(o_rx_dv),
+     .i_Tx_Byte(o_rx_byte),
+     .o_Tx_Active(o_tx_active),
+     .o_Tx_Serial(o_tx_serial),
+     .o_Tx_Done(o_tx_done),
+     .clks_per_bit(clks_per_bit)
+   );
 
-    /* UART Receiver Instance */
-    uart_rx uartrx (
-        .i_Clock(clk),
-        .Clock_Count(r_Clock_Count),
-        .i_Rx_Serial(rx_serial),
-        .uart_config_data(r_config_data),
-        .o_Rx_DV(w_data_dv),
-        .o_Rx_Byte(w_received_byte)
-    );
+   uart_rx uart_rx_inst
+   (
+     .i_Clock(i_clock),
+     .i_Reset(i_reset),
+     .i_Rx_Serial(i_rx_serial),
+     .o_Rx_DV(o_rx_dv),
+     .o_Rx_Byte(o_rx_byte),
+     .clks_per_bit(clks_per_bit),
+     .o_Rx_Verify(o_rx_verify)
+   );
 
 endmodule

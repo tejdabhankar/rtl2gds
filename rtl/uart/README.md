@@ -153,12 +153,12 @@ flowchart TD
 
 ## Current Status
 
-- [ ] specification ready
-- [ ] uart_tx design
-- [ ] uart_rx design
-- [ ] fifo design
-- [ ] baud generator design
-- [ ] top module integration
+- [x] specification ready
+- [x] uart_tx design
+- [x] uart_rx design
+- [x] fifo design
+- [x] baud generator design
+- [x] top module integration
 - [ ] testbench
 - [ ] simulation pass
 - [ ] synthesis pass
