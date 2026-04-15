@@ -52,8 +52,7 @@ module uart_rx
   // (It removes problems caused by metastability)
   always @(posedge i_Clock)
     begin
-      r_Rx_Data_R <= i_Rx_Serial;
-      r_Rx_Data   <= r_Rx_Data_R;
+
     end
 
 
@@ -70,6 +69,8 @@ module uart_rx
          r_SM_Main     <= 0;
       end else
         begin  
+            r_Rx_Data_R <= i_Rx_Serial;
+            r_Rx_Data   <= r_Rx_Data_R;
           case (r_SM_Main)
             s_IDLE :
               begin

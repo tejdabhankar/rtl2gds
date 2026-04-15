@@ -1,5 +1,4 @@
 {
-    "PDK": "gf180mcuC",
     "DESIGN_NAME": "uart_top",
     "VERILOG_FILES": [
         "dir::uart_top.v",
